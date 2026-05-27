@@ -31,6 +31,17 @@ pytest --cov=harness      # coverage
 
 The harness is designed so each module can be tested in isolation. Always add a unit test under `tests/test_<module>.py` when you change behavior.
 
+## Diagrams
+
+**Default to Mermaid for every diagram.** Use a fenced ```` ```mermaid ```` block in Markdown — never ASCII art, ANSI box-drawing, or external image files. This applies to README sections, `docs/`, PR descriptions, design notes, comments embedded in code, and any documentation Claude generates from this repo.
+
+- For architecture: `flowchart TB` (top-bottom) with `subgraph` groupings.
+- For control flow: `flowchart LR` or `stateDiagram-v2`.
+- For sequences (e.g., a tool call → API → tool result round-trip): `sequenceDiagram`.
+- For module dependencies: `flowchart` with arrow direction matching import direction.
+
+When adding a Mermaid diagram, prefer node labels that include the module number (e.g., `M1 Orchestration`) so they line up with the README's numbered table.
+
 ## Anti-patterns to avoid
 
 - Catching `Exception` instead of using `harness.errors` classification.

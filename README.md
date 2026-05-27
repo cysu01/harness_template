@@ -45,26 +45,49 @@ Each module is a self-contained package with a small, opinionated public API. Se
 
 ## Architecture
 
-```
-            ┌──────────────────────────────────────────────┐
-            │                Agent (agent.py)              │
-            │  composes all 12 modules into one entry pt   │
-            └──────────────────────────────────────────────┘
-                                   │
-        ┌──────────────────────────┼──────────────────────────┐
-        │                          │                          │
-   Orchestration ───── Prompts ─── Context ─── Memory ─── Tools
-   (ReAct loop)        (assembly)  (window)    (S/L term)   (registry)
-        │
-   ┌────┴─────┬────────┬───────────┬───────────┬─────────┐
-   │          │        │           │           │         │
-Structured  State   Errors    Guardrails  Validation  Subagents
- Output    (ckpts) (retry)    (PII/RBAC)    (judge)    (fork)
-   │
-   └──── Init & Environment (Docker, MCP, .env) ────┘
+```mermaid
+flowchart TB
+    Agent["<b>Agent</b> (agent.py)<br/><i>composes all 12 modules into one entry point</i>"]
+
+    subgraph Runtime["Runtime loop"]
+        direction LR
+        M1["<b>1</b> Orchestration<br/><sub>ReAct loop</sub>"]
+        M5["<b>5</b> Prompts<br/><sub>assembly</sub>"]
+        M4["<b>4</b> Context<br/><sub>window</sub>"]
+        M3["<b>3</b> Memory<br/><sub>short / long term</sub>"]
+        M2["<b>2</b> Tools<br/><sub>registry</sub>"]
+        M1 --- M5 --- M4 --- M3 --- M2
+    end
+
+    subgraph Control["Verification & control"]
+        direction LR
+        M6["<b>6</b> Structured Output"]
+        M7["<b>7</b> State<br/><sub>checkpoints</sub>"]
+        M8["<b>8</b> Errors<br/><sub>retry</sub>"]
+        M9["<b>9</b> Guardrails<br/><sub>PII / RBAC</sub>"]
+        M10["<b>10</b> Validation<br/><sub>judge</sub>"]
+        M11["<b>11</b> Sub-agents<br/><sub>fork</sub>"]
+    end
+
+    M12["<b>12</b> Init &amp; Environment<br/><sub>Docker · MCP · .env</sub>"]
+
+    Agent --> Runtime
+    Runtime --> Control
+    Control --> M12
+
+    classDef agent fill:#1f2937,stroke:#111827,color:#fff,font-weight:bold
+    classDef runtime fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a
+    classDef control fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef foundation fill:#dcfce7,stroke:#16a34a,color:#14532d
+    class Agent agent
+    class M1,M2,M3,M4,M5 runtime
+    class M6,M7,M8,M9,M10,M11 control
+    class M12 foundation
 ```
 
 The `Agent` class in `src/harness/agent.py` wires every module together. To customize, replace any single module — they don't depend on each other's internals, only their public interfaces.
+
+> **Diagram convention:** All diagrams in this repo are authored in [Mermaid](https://mermaid.js.org/). GitHub, VS Code, and most modern Markdown renderers display them natively — keep new diagrams in `mermaid` fenced code blocks rather than ASCII art or external images.
 
 ## Configuration
 

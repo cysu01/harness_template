@@ -1,0 +1,27 @@
+services:
+  agent:
+    build: .
+    env_file: .env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - ./.harness:/home/agent/app/.harness
+    depends_on:
+      - redis
+    # Lock down: no host network, read-only fs except for checkpoint dir,
+    # drop all caps, no privilege escalation.
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:
